@@ -20,6 +20,10 @@ def registroEstudiantes():
                 2. Ver registros
                 3. Agregar materias
                 4. Salir
+                
+                Nota: - Para registrar un estudiante, primero debes agregar las materias a evaluar. 
+                - Si no agregas materias, el programa registrará las notas de los estudiantes  
+                - con las materias predefinidas.
         ''')
         
         try:
@@ -108,6 +112,29 @@ def registroEstudiantes():
                     
 
                 case 3:
+                    seguir= 1
+                    while seguir==1:
+                        print("----- AGREGAR MATERIAS -----\n")
+                        
+                        print("MATERIAS ACTUALES")
+                        
+                        for i, materia in enumerate(materias, start=1):
+                            print(f"{i}. {materia}")
+                            
+                        
+                        nueva_materia= str(input("Ingresa el nombre de la nueva materia: ")).capitalize()
+                        
+                        if nueva_materia in materias:
+                            print("Error: La materia ya existe. Volviendo al menú principal... \n")
+                            continue
+                            
+                        materias += (nueva_materia,)
+                        print(f"Materia '{nueva_materia}' agregada exitosamente. Volviendo al menú principal... \n")
+                        
+                        seguir= (input("¿Desea agregar otra materia? (1: Sí, Cualquier otro valor: No) \n"))
+                        seguir= int(seguir)
+                    
+                case 4:
                     print("¡Gracias por usar nuestro programa! Vuelva pronto")
                     break
 
@@ -116,7 +143,7 @@ def registroEstudiantes():
 
 
         except ValueError:
-            print("Error: Campos con valores erróneos")
+            print("Error: Campos con valores erróneos. Volviendo al menú principal...")
             
             
             
