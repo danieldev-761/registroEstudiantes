@@ -6,9 +6,9 @@ def registroEstudiantes():
     id_actual_est= 1
     id_actual_materia= 1
 
-    cantidad_notas_x_materia =3
+    cantidad_notas_x_materia =1
 
-    notas_x_estudiante=[]
+
 
     
     
@@ -17,9 +17,9 @@ def registroEstudiantes():
         print('''
               --------------- CALCULADORA DE NOTAS ---------------
                 1. Registrar estudiantes
-                2. Ver registros
+                2. Ver registros (individuales o generales)
                 3. Agregar materias
-                4. Salir
+                5. Salir
                 
                 Nota: - Para registrar un estudiante, primero debes agregar las materias a evaluar. 
                 - Si no agregas materias, el programa registrará las notas de los estudiantes  
@@ -28,8 +28,7 @@ def registroEstudiantes():
         
         try:
             
-            opcion= int(input("Ingresa una opción del menú: "))
-            
+            opcion= int(input("Ingresa una opción del menú (1,2,3,4): "))
                 
             match opcion:
                 
@@ -40,80 +39,122 @@ def registroEstudiantes():
                     while opc==1:
 
                         nombre= str(input("¿Cuál es el nombre del estudiante? "))
-                                            
-                        notas= []
-                        i= 0
 
-                        for materia in range(len(materias)):
-                            print(f"\nIngresando notas de {materias[materia]}:")
-                            for nota in range(cantidad_notas_x_materia):
+                        materias_regis = []
+                        for materia in materias:
+                            print(f"\nIngresando notas de {materia}:")
 
+                            notas = []
+                            for nota_indice in range(cantidad_notas_x_materia):
                                 nota_valida = False
                                 while not nota_valida:
                                     try:
-                                        calificacion = float(input(f"Ingresa {nota+1}° nota: "))
-
+                                        calificacion = float(input(f"Ingresa {nota_indice+1}° nota: "))
                                         if calificacion < 0 or calificacion > 5:
                                             print("Error: La nota debe ser un número entre 0 y 5")
                                         else:
                                             notas.append(calificacion)
-                                            i += 1
                                             nota_valida = True
 
                                     except ValueError:
                                         print("Error: La nota debe ser un número válido")
-                            
-                        
-                        promedio= calcularPromedio(notas, cantidad_notas_x_materia)
-                        aprobado= True if promedio>=3 else False
-                                
-                
 
-                        notas_x_materia={
-                            "id": id_actual_materia,
-                            "materia": materias[i],
-                            "notas": notas
-                        }
+                            promedio_materia = calcularPromedio(notas, cantidad_notas_x_materia)
+                            materias_regis.append({
+                                "id": id_actual_materia,
+                                "materia": materia,
+                                "notas": notas,
+                                "promedio": promedio_materia
+                            })
+                            id_actual_materia += 1
+
+                        promedios_materias = [m['promedio'] for m in materias_regis]
+                        promedio = round(sum(promedios_materias) / len(promedios_materias), 3)
+                        aprobado = True if promedio >= 3 else False
 
                         estudiante = {
-                        "id": id_actual_est,
-                        "nombre": nombre,
-                        "notas": notas_x_materia,
-                        "promedio": promedio,
-                        "aprobado": aprobado
-                    }
+                            "id": id_actual_est,
+                            "nombre": nombre,
+                            "materias": materias_regis,
+                            "promedio": promedio,
+                            "aprobado": aprobado
+                        }
 
-                        notas_x_estudiante.append(notas_x_materia)
                         estudiantes.append(estudiante)
-
-                        id_actual_materia += 1
                         id_actual_est += 1
-                            
+
                         cargar_registros(estudiantes)
+
+                        opc= (input("¿Desea registrar otro estudiante? (1: Sí, Cualquier otro valor: No) "))
+                        opc= int(opc)
                     
                     numero_estudiantes= len(estudiantes)
                     
                     calcularPromedioGeneral(estudiantes, numero_estudiantes)
 
-                    opc= (input("¿Desea registrar otro estudiante? (1: Sí, Cualquier otro valor: No) "))
-                    opc= int(opc)
+                    
                         
 
                 case 2:
+
+                    print("""----- REGISTROS DE ESTUDIANTES -----\n
+                    1. Ver registros de todos los estudiantes
+                    2. Ver registros de un estudiante específico
+                          """)
                     
-                    if estudiantes!=[]:
-                        
-                        print("Cargando registros de estudiantes...")
-                        cargar_registros(estudiantes)
-                        numero_estudiantes= len(estudiantes)
-                        calcularPromedioGeneral(estudiantes, numero_estudiantes)
-                    else:
-                        print("Base de datos vacía. Volviendo al menú principal...")
+                    opcion_registros= int(input("Ingresa una opción (1 o 2, cualquier otra tecla para salir): "))
+
+                    match opcion_registros:
+                        case 1:
+                    
+                            if estudiantes!=[]:
+                                
+                                print("Cargando registros de estudiantes...")
+                                cargar_registros(estudiantes)
+                                numero_estudiantes= len(estudiantes)
+                                calcularPromedioGeneral(estudiantes, numero_estudiantes)
+                            else:
+                                print("Base de datos vacía. Volviendo al menú principal...")
+
+                        case 2:
+                            if estudiantes!=[]:
+
+                                print("Cargando registros de estudiantes...")
+                                cargar_estudiantes(estudiantes)
+                                
+
+    
+                                id_estudiante= int(input("Ingresa el ID del estudiante que deseas consultar: "))
+
+                                estudiante_encontrado = None
+                                for est in estudiantes:
+
+                                    if est['id'] == id_estudiante:
+
+                                        estudiante_encontrado = est
+                                        break
+
+                                if estudiante_encontrado:
+                                    print(f"ID: {estudiante_encontrado['id']}  |  Estudiante: {estudiante_encontrado['nombre']}")
+
+                                    for mat in estudiante_encontrado.get('materias', []):
+                                        print(f"  - Materia: {mat['materia']} | Notas: {mat['notas']} | Promedio: {mat['promedio']}")
+
+                                    print(f"  Promedio general (todas las materias): {estudiante_encontrado.get('promedio')}")
+
+                                else:
+                                    print("Error: No se encontró un estudiante con ese ID. Volviendo al menú principal...")
+                            else:
+                                print("Base de datos vacía. Volviendo al menú principal...")
+
+                        case _:
+                            print("Volviendo al menú principal...")
                     
 
                 case 3:
                     seguir= 1
                     while seguir==1:
+
                         print("----- AGREGAR MATERIAS -----\n")
                         
                         print("MATERIAS ACTUALES")
@@ -124,16 +165,15 @@ def registroEstudiantes():
                         
                         nueva_materia= str(input("Ingresa el nombre de la nueva materia: ")).capitalize()
                         
-                        if nueva_materia in materias:
-                            print("Error: La materia ya existe. Volviendo al menú principal... \n")
+                        if not validar_materia(nueva_materia, materias):
                             continue
-                            
-                        materias += (nueva_materia,)
+
+
                         print(f"Materia '{nueva_materia}' agregada exitosamente. Volviendo al menú principal... \n")
                         
                         seguir= (input("¿Desea agregar otra materia? (1: Sí, Cualquier otro valor: No) \n"))
                         seguir= int(seguir)
-                    
+                
                 case 4:
                     print("¡Gracias por usar nuestro programa! Vuelva pronto")
                     break
@@ -154,12 +194,13 @@ def calcularPromedio(notas, cantidad_notas):
     
 def cargar_registros(estudiantes):
     print("\nREGISTROS GUARDADOS:\n")
-    print("ID  | ESTUDIANTE | NOTAS | PROMEDIO | APROBADO")
-    print("--------------------------------------------------")
-        
+
     for est in estudiantes:
-            print(f"  {est['id']}  | {est['nombre']} |    {est['notas']} |    {est['promedio']} |    {est['aprobado']}")
-    print("--------------------------------------------------")
+        print(f"ID: {est['id']}  |  Estudiante: {est['nombre']}")
+        for mat in est.get('materias', []):
+            print(f"  - Materia: {mat['materia']} | Notas: {mat['notas']} | Promedio: {mat['promedio']}")
+        print(f"  Promedio general (todas las materias): {est.get('promedio')}")
+        print("--------------------------------------------------")
 
 def calcularPromedioGeneral(estudiantes, numero_estudiantes):
     suma_promedios= 0 
@@ -175,6 +216,31 @@ def calcularPromedioGeneral(estudiantes, numero_estudiantes):
 
     print(f"Cantidad de estudiantes aprobados: {aprobados}/{numero_estudiantes}")
     print(f"Porcentaje de estudiantes aprobados: {porcentaje_aprobados}%")
+
+def validar_materia(nueva_materia, materias):
+
+    if nueva_materia.strip() == "":
+        print("Error: El nombre de la materia no puede estar vacío.")
+        return False
+    
+    elif not nueva_materia.isalpha():
+        print("Error: El nombre de la materia solo puede contener letras.")
+        return False
+    
+    elif nueva_materia in materias:
+        print("Error: La materia ya existe.")
+        return False
+    
+
+    
+    return True
+
+def cargar_estudiantes(estudiantes):
+    print("\nREGISTROS GUARDADOS:\n")
+
+    for est in estudiantes:
+        print(f"ID: {est['id']}  |  Estudiante: {est['nombre']}")
+        
 
     
 registroEstudiantes()
